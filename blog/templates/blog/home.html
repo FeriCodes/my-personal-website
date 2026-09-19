@@ -1,10 +1,16 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
-</head>
-<body>
-    <h1>my personal blog</h1>
-</body>
-</html>
+{% extends 'blog/base.html' %}
+
+{% block title %}Home Page{% endblock %}
+
+{% block content %}
+    <div class="mt-4">
+        <h1>Welcome to My Personal Blog</h1>
+        <p class="lead mt-3">
+            Hello, my name is Hossein. I am learning Python and Django, and this is my space on the web.
+        </p>
+        <p>
+            I built this website to track my progress, share my projects, and practice my skills every day.
+            Feel free to explore and see what I am working on.
+        </p>
+    </div>
+{% endblock %}
