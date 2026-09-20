@@ -1,16 +1,108 @@
-{% extends 'blog/base.html' %}
+{% extends "blog/base.html" %}
+{% load static %}
 
-{% block title %}Home Page{% endblock %}
+{% block title %}Home | FeriCodes{% endblock %}
 
 {% block content %}
-    <div class="mt-4">
-        <h1>Welcome to My Personal Blog</h1>
-        <p class="lead mt-3">
-            Hello, my name is Hossein. I am learning Python and Django, and this is my space on the web.
+    <!-- Hero Section Centered -->
+    <div class="mt-5 mb-5 pb-5 border-bottom text-center"
+         style="border-color: #2d2942 !important">
+        <img src="{% static 'blog/images/profile.jpg' %}"
+             alt="Hossein Profile"
+             class="rounded-circle profile-image mb-4">
+
+        <h1 class="display-5 fw-bold text-white mb-3">Hi, I am Hossein</h1>
+        <p class="bio-text mx-auto mb-4">
+            I am a back-end developer focused on Python and Django. This is my personal blog where I share my ideas, active projects, and my daily coding journey.
         </p>
-        <p>
-            I built this website to track my progress, share my projects, and practice my skills every day.
-            Feel free to explore and see what I am working on.
-        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="https://github.com/FeriCodes"
+               target="_blank"
+               class="btn btn-custom-outline px-4 py-2">GitHub</a>
+            <a href="mailto:hosseinbigdeli335@gmail.com"
+               class="btn btn-custom-outline px-4 py-2">Email</a>
+            <a href="https://t.me/XO_FOR_EVER"
+               target="_blank"
+               class="btn btn-custom-outline px-4 py-2">Telegram</a>
+        </div>
+    </div>
+
+    <!-- Skills Section Centered -->
+    <div class="mt-5 mb-5 text-center">
+        <h3 class="text-white mb-4">My Skills</h3>
+        <div class="circular-progress-container justify-content-center">
+
+            <div class="circular-progress-wrapper">
+                <div class="circular-progress"
+                     style="background: conic-gradient(#61afef 85%, #2d2942 0deg)">
+                    <span class="progress-value">85%</span>
+                </div>
+                <span class="skill-title justify-content-center">
+                    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg"
+                         alt="Python"
+                         width="22"
+                         class="me-2">
+                    Python
+                </span>
+            </div>
+
+            <div class="circular-progress-wrapper">
+                <div class="circular-progress"
+                     style="background: conic-gradient(#98c379 30%, #2d2942 0deg)">
+                    <span class="progress-value">30%</span>
+                </div>
+                <span class="skill-title justify-content-center">
+                    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/django/django-plain.svg"
+                         alt="Django"
+                         width="22"
+                         class="me-2 icon-invert">
+                    Django
+                </span>
+            </div>
+
+            <div class="circular-progress-wrapper">
+                <div class="circular-progress"
+                     style="background: conic-gradient(#e5c07b 15%, #2d2942 0deg)">
+                    <span class="progress-value">15%</span>
+                </div>
+                <span class="skill-title justify-content-center">
+                    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg"
+                         alt="PostgreSQL"
+                         width="22"
+                         class="me-2">
+                    PostgreSQL
+                </span>
+            </div>
+
+            <div class="circular-progress-wrapper">
+                <div class="circular-progress"
+                     style="background: conic-gradient(#e06c75 90%, #2d2942 0deg)">
+                    <span class="progress-value">90%</span>
+                </div>
+                <span class="skill-title justify-content-center">
+                    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/github/github-original.svg"
+                         alt="GitHub"
+                         width="22"
+                         class="me-2 icon-invert">
+                    Git
+                </span>
+            </div>
+
+            <div class="circular-progress-wrapper">
+                <div class="circular-progress"
+                     style="background: conic-gradient(#c678dd 70%, #2d2942 0deg)">
+                    <span class="progress-value">70%</span>
+                </div>
+                <span class="skill-title justify-content-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg"
+                         alt="English"
+                         width="22"
+                         class="me-2">
+                    English
+                </span>
+            </div>
+
+        </div>
     </div>
 {% endblock %}
