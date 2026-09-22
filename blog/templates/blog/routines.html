@@ -1,0 +1,86 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}My Routines{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    <div class="container mt-4" style="max-width: 800px;">
+
+        <!-- Intro Section (Outside the box) -->
+        <div class="mb-4">
+            <h2 style="color: #61afef;
+                       font-weight: bold;
+                       border-bottom: 2px solid #3e4451;
+                       padding-bottom: 10px">My Routines</h2>
+            <p style="color: #a8a3c4;
+                      font-size: 1.05rem;
+                      line-height: 1.6;
+                      margin-top: 15px">
+                These are my daily routines and habits. You can see what I do every day to stay on track.
+                Click on any task to see its calendar and history.
+            </p>
+        </div>
+
+        <!-- The Notebook Box -->
+        <div class="notebook-wrapper">
+            {% for task in tasks %}
+                <div class="routine-card {% if task.status == 'done' %}status-done{% else %}status-pending{% endif %}">
+
+                    <div class="routine-info">
+                        <a href="#" class="routine-title-link">
+                            <div class="routine-title">{{ task.name }}</div>
+                        </a>
+                        <div class="routine-stats">Freezes: {{ task.freezes_left }} | Best: {{ task.longest_streak }}</div>
+                    </div>
+
+                    <div class="routine-actions">
+                        <div class="routine-streak-box">
+                            <div class="routine-streak">{{ task.streak }} Days</div>
+                        </div>
+
+                        <button class="btn-check-routine" data-task-id="{{ task.id }}">✓</button>
+                    </div>
+
+                </div>
+            {% empty %}
+                <div class="routine-empty">No routines found. Add one in the admin panel!</div>
+            {% endfor %}
+        </div>
+
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const checkButtons = document.querySelectorAll(".btn-check-routine");
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            checkButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const taskId = this.getAttribute("data-task-id");
+
+                    fetch(`/routines/update/${taskId}/`, {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": csrfToken,
+                                "Content-Type": "application/json"
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                const card = this.closest(".routine-card");
+                                card.classList.remove("status-pending");
+                                card.classList.add("status-done");
+
+                                const streakBox = card.querySelector(".routine-streak");
+                                streakBox.textContent = data.new_streak + " Days";
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+{% endblock %}

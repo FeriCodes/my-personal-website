@@ -9,6 +9,7 @@ body {
 .custom-navbar, .custom-sidebar {
     background-color: #1e1b26 !important;
 }
+
 .custom-navbar {
     background-color: #12101c;
     border-bottom: 1px solid #2d2942;
@@ -108,4 +109,109 @@ body {
 
 .icon-invert {
     filter: brightness(0) invert(1);
+}
+
+/* =========================================
+   ROUTINES PAGE STYLES
+   ========================================= */
+
+.notebook-wrapper {
+    border: 2px dashed #3e4451;
+    border-radius: 12px;
+    padding: 30px;
+    background-color: #1e1b26;
+    margin-bottom: 50px;
+}
+
+.routine-card {
+    background-color: #21252b;
+    padding: 15px 25px;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #e5c07b;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.routine-card:hover {
+    transform: translateX(5px);
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.routine-card.status-done {
+    border-left-color: #98c379;
+}
+
+.routine-info .routine-title {
+    color: #e2e2e2;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.routine-info .routine-stats {
+    color: #a8a3c4;
+    font-size: 0.9rem;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+.routine-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.routine-streak-box {
+    text-align: right;
+}
+
+.routine-streak {
+    color: #98c379;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.btn-check-routine {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-check-routine:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.btn-check-routine:active {
+    transform: scale(0.95);
+}
+
+.routine-empty {
+    color: #a8a3c4;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Link style for Routine Title */
+.routine-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+
+.routine-title-link:hover .routine-title {
+    color: #61afef;
+    transition: color 0.2s ease;
 }
