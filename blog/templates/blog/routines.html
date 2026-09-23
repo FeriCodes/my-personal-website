@@ -4,8 +4,9 @@
 {% block title %}My Routines{% endblock %}
 
 {% block content %}
-    {% csrf_token %}
     <div class="container mt-4" style="max-width: 800px;">
+
+        {% csrf_token %}
 
         <!-- Intro Section (Outside the box) -->
         <div class="mb-4">
@@ -36,7 +37,8 @@
 
                     <div class="routine-actions">
                         <div class="routine-streak-box">
-                            <div class="routine-streak">{{ task.streak }} Days</div>
+                            <!-- Updated text to Current Streak as you suggested -->
+                            <div class="routine-streak">Streak: {{ task.streak }} Days</div>
                         </div>
 
                         <button class="btn-check-routine" data-task-id="{{ task.id }}">✓</button>
@@ -50,11 +52,18 @@
 
     </div>
 {% endblock %}
+
 {% block scripts %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const checkButtons = document.querySelectorAll(".btn-check-routine");
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+
+            if (!csrfInput) {
+                console.error("CSRF token not found!");
+                return;
+            }
+            const csrfToken = csrfInput.value;
 
             checkButtons.forEach(button => {
                 button.addEventListener("click", function() {
@@ -75,7 +84,7 @@
                                 card.classList.add("status-done");
 
                                 const streakBox = card.querySelector(".routine-streak");
-                                streakBox.textContent = data.new_streak + " Days";
+                                streakBox.textContent = "Streak: " + data.new_streak + " Days";
                             }
                         })
                         .catch(error => console.error("Error:", error));
