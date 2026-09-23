@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from datetime import datetime
 
 
 class Task(models.Model):
@@ -12,12 +11,12 @@ class Task(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, default='pending')
     last_updated = models.DateTimeField(null=True, blank=True)
     freezes_left = models.IntegerField(default=3)
-    last_freeze_reset = models.CharField(max_length=7, default=timezone.now().strftime("%Y-%m"))
+    last_freeze_reset = models.CharField(max_length=7, blank=True)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
         if not self.last_freeze_reset:
-            self.last_freeze_reset = datetime.now().strftime("%Y-%m")
+            self.last_freeze_reset = timezone.now().strftime("%Y-%m")
         super().save(*args, **kwargs)
