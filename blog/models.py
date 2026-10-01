@@ -28,7 +28,7 @@ class TaskDailyLog(models.Model):
         ('frozen', 'Frozen'),
         ('missed', 'Missed'),
     ]
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='daily_log')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='daily_logs')
     date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=10, choices=LOG_STATUS_CHOICES)
 
