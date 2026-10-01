@@ -5,11 +5,16 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+def home(request):
+    return render(request, 'blog/home.html')
+
+
 def process_task_logic(task):
     now = timezone.now()
     today = now.date()
     current_month = now.strftime("%Y-%m")
 
+    # 1. Reset freezes monthly
     if task.last_freeze_reset != current_month:
         task.freezes_left = 3
         task.last_freeze_reset = current_month
@@ -36,6 +41,16 @@ def process_task_logic(task):
                 task.freezes_left = 0
                 task.status = 'pending'
                 task.save()
+
+
+def routines_view(request):
+    tasks = Task.objects.all()
+    # Process logic for all tasks when loading the routines page
+    for task in tasks:
+        process_task_logic(task)
+
+    context = {'tasks': tasks}
+    return render(request, 'blog/routines.html', context)
 
 
 def update_task(request, task_id):
@@ -68,3 +83,15 @@ def update_task(request, task_id):
         return JsonResponse({'status': 'success', 'new_streak': task.streak, 'message': 'Task completed for today!'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+def task_detail(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    # Get all logs for this task ordered by date
+    logs = task.daily_logs.order_by('-date')
+
+    context = {
+        'task': task,
+        'logs': logs,
+    }
+    return render(request, 'blog/task_detail.html', context)
