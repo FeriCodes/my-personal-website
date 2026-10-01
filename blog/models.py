@@ -20,3 +20,20 @@ class Task(models.Model):
         if not self.last_freeze_reset:
             self.last_freeze_reset = timezone.now().strftime("%Y-%m")
         super().save(*args, **kwargs)
+
+
+class TaskDailyLog(models.Model):
+    LOG_STATUS_CHOICES = [
+        ('done', 'Done'),
+        ('frozen', 'Frozen'),
+        ('missed', 'Missed'),
+    ]
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='daily_log')
+    date = models.DateField(default=timezone.now)
+    status = models.CharField(max_length=10, choices=LOG_STATUS_CHOICES)
+
+    class Meta:
+        unique_together = ('task', 'date')
+
+    def __str__(self):
+        return f"{self.task.name} - {self.date} - {self.status}"
