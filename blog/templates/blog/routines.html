@@ -23,7 +23,7 @@
                 <div class="routine-card {% if task.status == 'done' %}status-done{% else %}status-pending{% endif %}">
 
                     <div class="routine-info">
-                        <a href="#" class="routine-title-link">
+                        <a href="{% url 'task_detail' task.id %}" class="routine-title-link">
                             <div class="routine-title">{{ task.name }}</div>
                         </a>
                         <div class="routine-stats">Freezes: {{ task.freezes_left }} | Best: {{ task.longest_streak }}</div>

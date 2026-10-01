@@ -1,0 +1,62 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}{{ task.name }} - Details{% endblock %}
+
+{% block content %}
+    <div class="container mt-4 routines-container">
+
+        <!-- Top Bar: Back Link & Title -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 detail-header-divider">
+            <div>
+                <a href="/routines/" class="btn btn-outline-secondary btn-sm mb-2">← Back to Routines</a>
+                <h2 class="routines-header m-0">{{ task.name }}</h2>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark p-2 detail-badge-streak">
+                    Current Streak: <strong class="detail-streak-highlight">{{ task.streak }} Days</strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="notebook-wrapper mb-4">
+            <div class="row text-center">
+                <div class="col-4">
+                    <div class="detail-stat-label">LONGEST STREAK</div>
+                    <div class="h4 m-0 stat-longest-streak">{{ task.longest_streak }} Days</div>
+                </div>
+                <div class="col-4">
+                    <div class="detail-stat-label">FREEZES LEFT</div>
+                    <div class="h4 m-0 stat-freezes">{{ task.freezes_left }}</div>
+                </div>
+                <div class="col-4">
+                    <div class="detail-stat-label">STATUS TODAY</div>
+                    <div class="h4 m-0 {% if task.status == 'done' %}stat-status-done{% else %}stat-status-pending{% endif %}">
+                        {{ task.status|title }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder for Calendar Grid -->
+        <div class="notebook-wrapper">
+            <h4 class="mb-3 calendar-section-title">Activity Calendar</h4>
+            <p class="calendar-section-desc">History records logged for this routine:</p>
+
+            <ul class="list-group list-group-flush bg-transparent">
+                {% for log in logs %}
+                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+                        <span>{{ log.date }}</span>
+                        <span class="badge bg-success">{{ log.status }}</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item bg-transparent text-muted border-0 p-0">
+                        No history logged yet. Complete the task today to start recording!
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+{% endblock %}
