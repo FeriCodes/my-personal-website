@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from .models import Task
+from .models import Task, TaskDailyLog
 from django.utils import timezone
 from datetime import timedelta
 
@@ -38,20 +38,6 @@ def process_task_logic(task):
                 task.save()
 
 
-def home(request):
-    return render(request, "blog/home.html")
-
-
-def routines_view(request):
-    tasks = Task.objects.all()
-
-    # We must run the logic for every task when the page loads
-    for task in tasks:
-        process_task_logic(task)
-
-    return render(request, 'blog/routines.html', {'tasks': tasks})
-
-
 def update_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
 
@@ -75,6 +61,9 @@ def update_task(request, task_id):
         task.last_updated = now
         task.status = 'done'
         task.save()
+
+        # 5. Record daily log for contribution calendar
+        TaskDailyLog.objects.update_or_create(task=task, date=today, defaults={'status': 'done'})
 
         return JsonResponse({'status': 'success', 'new_streak': task.streak, 'message': 'Task completed for today!'})
 
