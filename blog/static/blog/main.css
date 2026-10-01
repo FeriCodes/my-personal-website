@@ -247,3 +247,51 @@ body {
     background-color: #2e3440;
     transform: none;
 }
+
+/* =========================================
+   TASK DETAIL PAGE STYLES
+   ========================================= */
+
+.detail-header-divider {
+    border-color: #3e4451 !important;
+}
+
+.detail-badge-streak {
+    font-size: 1rem;
+    border: 1px solid #3e4451;
+}
+
+.detail-streak-highlight {
+    color: #98c379;
+}
+
+.detail-stat-label {
+    color: #a8a3c4;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.stat-longest-streak {
+    color: #e5c07b;
+}
+
+.stat-freezes {
+    color: #61afef;
+}
+
+.stat-status-done {
+    color: #98c379;
+}
+
+.stat-status-pending {
+    color: #e06c75;
+}
+
+.calendar-section-title {
+    color: #e2e2e2;
+}
+
+.calendar-section-desc {
+    color: #a8a3c4;
+    font-size: 0.85rem;
+}
