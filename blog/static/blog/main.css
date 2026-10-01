@@ -233,3 +233,17 @@ body {
     line-height: 1.6;
     margin-top: 15px;
 }
+
+.routine-card.status-done .btn-check-routine {
+    background-color: #2e3440;
+    color: #5c6370;
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+.routine-card.status-done .btn-check-routine:hover {
+    background-color: #2e3440;
+    transform: none;
+}

@@ -34,7 +34,9 @@
                             <div class="routine-streak">Streak: {{ task.streak }} Days</div>
                         </div>
 
-                        <button class="btn-check-routine" data-task-id="{{ task.id }}">✓</button>
+                        <button class="btn-check-routine"
+                                data-task-id="{{ task.id }}"
+                                {% if task.status == 'done' %}disabled{% endif %}>✓</button>
                     </div>
 
                 </div>
@@ -84,9 +86,12 @@
                         .then(data => {
                             if (data.status === "success") {
                                 // Update UI for success
-                                const card = this.closest(".routine-card");
+                                const card = button.closest(".routine-card");
                                 card.classList.remove("status-pending");
                                 card.classList.add("status-done");
+
+                                // Disable the button immediately
+                                button.disabled = true;
 
                                 const streakBox = card.querySelector(".routine-streak");
                                 streakBox.textContent = "Streak: " + data.new_streak + " Days";
@@ -96,7 +101,6 @@
                                     icon: 'success',
                                     title: data.message
                                 });
-
                             } else if (data.status === "info") {
                                 // Show SweetAlert Info Toast
                                 Toast.fire({
