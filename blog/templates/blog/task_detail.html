@@ -39,23 +39,66 @@
             </div>
         </div>
 
-        <!-- Placeholder for Calendar Grid -->
+        <!-- Monthly Contribution Calendar -->
         <div class="notebook-wrapper">
-            <h4 class="mb-3 calendar-section-title">Activity Calendar</h4>
-            <p class="calendar-section-desc">History records logged for this routine:</p>
+            <!-- Centered Month & Year -->
+            <div class="text-center mb-4">
+                <h3 class="m-0 calendar-section-title fw-bold">{{ month_name }} {{ year }}</h3>
+            </div>
 
-            <ul class="list-group list-group-flush bg-transparent">
-                {% for log in logs %}
-                    <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
-                        <span>{{ log.date }}</span>
-                        <span class="badge bg-success">{{ log.status }}</span>
-                    </li>
-                {% empty %}
-                    <li class="list-group-item bg-transparent text-muted border-0 p-0">
-                        No history logged yet. Complete the task today to start recording!
-                    </li>
-                {% endfor %}
-            </ul>
+            <!-- Calendar Grid Table -->
+            <div class="table-responsive">
+                <table class="table table-borderless text-center calendar-table">
+                    <thead>
+                        <tr class="calendar-weekdays">
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                            <th>Sun</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in calendar_weeks %}
+                            <tr>
+                                {% for day in week %}
+                                    <td>
+                                        {% if day.status != "empty" %}
+                                            <div class="calendar-day-box status-{{ day.status }} {% if day.is_today %}today-border{% endif %}"
+                                                 title="{{ day.date_str }}: {{ day.status|title }}">
+                                                <span class="day-number">{{ day.day }}</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="calendar-day-box empty-slot"></div>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top calendar-nav-divider">
+                <a href="?year={{ prev_year }}&month={{ prev_month }}"
+                   class="btn btn-calendar-nav">← Prev Month</a>
+                <a href="?year={{ today.year }}&month={{ today.month }}"
+                   class="btn btn-calendar-today">Today</a>
+                <a href="?year={{ next_year }}&month={{ next_month }}"
+                   class="btn btn-calendar-nav">Next Month →</a>
+            </div>
+
+            <!-- Minimalist Legend -->
+            <div class="d-flex justify-content-center flex-wrap gap-4 align-items-center mt-3 calendar-legend small">
+                <div><span class="legend-indicator legend-done"></span> Done</div>
+                <div><span class="legend-indicator legend-frozen"></span> Frozen</div>
+                <div><span class="legend-indicator legend-missed"></span> Broken / Missed</div>
+                <div><span class="legend-indicator legend-none"></span> No Record</div>
+                <div><span class="legend-indicator legend-today"></span> Today</div>
+            </div>
         </div>
 
     </div>

@@ -295,3 +295,184 @@ body {
     color: #a8a3c4;
     font-size: 0.85rem;
 }
+
+/* =========================================
+   CALENDAR COMPONENT STYLES
+   ========================================= */
+
+.calendar-table {
+    margin-bottom: 0;
+    background-color: transparent !important;
+}
+
+.calendar-table th,
+.calendar-table td {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: inherit;
+    padding: 8px 4px;
+}
+
+.calendar-weekdays th {
+    color: #a8a3c4;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding-bottom: 12px;
+}
+
+.calendar-day-box {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    border-radius: 8px;
+    background-color: #21252b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 1px solid #2d2942;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.calendar-day-box:hover {
+    transform: translateY(-2px);
+}
+
+.calendar-day-box .day-number {
+    font-size: 0.9rem;
+    color: #abb2bf;
+    line-height: 1;
+}
+
+/* 1. Done (تنها زمانی که واقعاً ثبت شده باشد) */
+.calendar-day-box.status-done {
+    background-color: #1f4e2b !important;
+    border: none !important;
+}
+
+.calendar-day-box.status-done .day-number {
+    color: #a7f39a !important;
+    font-weight: 700;
+}
+
+/* 2. Frozen */
+.calendar-day-box.status-frozen {
+    background-color: #23415e !important;
+    border: none !important;
+}
+
+.calendar-day-box.status-frozen .day-number {
+    color: #79c0ff !important;
+    font-weight: 700;
+}
+
+/* 3. Missed / Broken */
+.calendar-day-box.status-missed {
+    background-color: #4a1f26 !important;
+    border: none !important;
+}
+
+.calendar-day-box.status-missed .day-number {
+    color: #ff7b72 !important;
+    font-weight: 700;
+}
+
+/* 4. No Record / روزهای بدون فعالیت */
+.calendar-day-box.status-none {
+    background-color: #1a1824;
+    border: 1px solid #2d2942;
+}
+
+/* 5. Today (کادر زرد کهربایی؛ اگر تیک نخورده باشد پس‌زمینه دارک می‌ماند) */
+.calendar-day-box.today-border {
+    outline: 2px solid #e5c07b !important;
+    outline-offset: -1px;
+}
+
+.calendar-day-box.status-none.today-border {
+    background-color: #1a1824 !important;
+    border: none !important;
+}
+
+.calendar-day-box.empty-slot {
+    background: transparent;
+    border: none;
+}
+
+/* Calendar Bottom Controls */
+.calendar-nav-divider {
+    border-color: #2d2942 !important;
+}
+
+.btn-calendar-nav {
+    background-color: #21252b;
+    border: 1px solid #3e4451;
+    color: #a8a3c4;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-calendar-nav:hover {
+    background-color: #2d2942;
+    color: #ffffff;
+    border-color: #61afef;
+}
+
+.btn-calendar-today {
+    background-color: transparent;
+    border: 1px solid #61afef;
+    color: #61afef;
+    padding: 6px 18px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-calendar-today:hover {
+    background-color: #61afef;
+    color: #12101c;
+}
+
+/* Legend Component */
+.calendar-legend {
+    color: #a8a3c4;
+}
+
+.legend-indicator {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.legend-indicator.legend-done {
+    background-color: #1f4e2b;
+    border: 1px solid #a7f39a;
+}
+
+.legend-indicator.legend-frozen {
+    background-color: #23415e;
+    border: none;
+}
+
+.legend-indicator.legend-missed {
+    background-color: #4a1f26;
+    border: none;
+}
+
+.legend-indicator.legend-none {
+    background-color: #1a1824;
+    border: 1px solid #2d2942;
+}
+
+.legend-indicator.legend-today {
+    background-color: transparent;
+    border: 2px solid #e5c07b;
+}

@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from .models import Task, TaskDailyLog
 from django.utils import timezone
-from datetime import timedelta
+from datetime import date, timedelta
+import calendar
 
 
 def home(request):
@@ -87,11 +88,59 @@ def update_task(request, task_id):
 
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    # Get all logs for this task ordered by date
-    logs = task.daily_logs.order_by('-date')
+
+    today = timezone.localdate()
+    year = int(request.GET.get('year', today.year))
+    month = int(request.GET.get('month', today.month))
+
+    # Navigation logic
+    if month == 1:
+        prev_year, prev_month = year - 1, 12
+    else:
+        prev_year, prev_month = year, month - 1
+
+    if month == 12:
+        next_year, next_month = year + 1, 1
+    else:
+        next_year, next_month = year, month + 1
+
+    # Fetch daily logs for the selected month
+    logs = task.daily_logs.filter(date__year=year, date__month=month)
+    log_map = {log.date.day: log.status for log in logs}
+
+    cal = calendar.Calendar(firstweekday=0)
+    month_days = cal.monthdayscalendar(year, month)
+
+    calendar_weeks = []
+    for week in month_days:
+        week_data = []
+        for day in week:
+            if day == 0:
+                week_data.append({'day': '', 'status': 'empty', 'is_today': False})
+            else:
+                current_day_date = date(year, month, day)
+                is_today = current_day_date == today
+                day_status = log_map.get(day, 'none')
+                week_data.append(
+                    {
+                        'day': day,
+                        'status': day_status,
+                        'is_today': is_today,
+                        'date_str': current_day_date.strftime("%Y-%m-%d"),
+                    }
+                )
+        calendar_weeks.append(week_data)
 
     context = {
         'task': task,
-        'logs': logs,
+        'year': year,
+        'month': month,
+        'month_name': calendar.month_name[month],
+        'prev_year': prev_year,
+        'prev_month': prev_month,
+        'next_year': next_year,
+        'next_month': next_month,
+        'calendar_weeks': calendar_weeks,
+        'today': today,
     }
     return render(request, 'blog/task_detail.html', context)
