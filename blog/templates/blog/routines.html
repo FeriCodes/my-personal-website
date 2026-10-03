@@ -8,7 +8,7 @@
 
         {% csrf_token %}
 
-        <!-- Intro Section (Cleaned up) -->
+        <!-- Intro Section -->
         <div class="mb-4">
             <h2 class="routines-header">My Routines</h2>
             <p class="routines-description">
@@ -16,6 +16,22 @@
                 Click on any task to see its calendar and history.
             </p>
         </div>
+
+        <!-- Admin Add Routine Form (Protected) -->
+        {% if user.is_authenticated %}
+            <form action="{% url 'add_task' %}"
+                  method="post"
+                  class="d-flex gap-2 mb-4 routine-add-form">
+                {% csrf_token %}
+                <input type="text"
+                       name="task_name"
+                       class="form-control routine-input"
+                       placeholder="New routine name..."
+                       required>
+                <button type="submit"
+                        class="btn btn-outline-success text-nowrap btn-add-routine">+ Add Routine</button>
+            </form>
+        {% endif %}
 
         <!-- The Notebook Box -->
         <div class="notebook-wrapper">
@@ -34,14 +50,26 @@
                             <div class="routine-streak">Streak: {{ task.streak }} Days</div>
                         </div>
 
+                        <!-- Check Routine Button -->
                         <button class="btn-check-routine"
                                 data-task-id="{{ task.id }}"
                                 {% if task.status == 'done' %}disabled{% endif %}>✓</button>
+
+                        <!-- Admin Delete Routine Button (Protected) -->
+                        {% if user.is_authenticated %}
+                            <form action="{% url 'delete_task' task.id %}"
+                                  method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this routine?');"
+                                  class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-delete-routine">✕</button>
+                            </form>
+                        {% endif %}
                     </div>
 
                 </div>
             {% empty %}
-                <div class="routine-empty">No routines found. Add one in the admin panel!</div>
+                <div class="routine-empty">No routines found. Add one above!</div>
             {% endfor %}
         </div>
 
@@ -85,24 +113,20 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === "success") {
-                                // Update UI for success
                                 const card = button.closest(".routine-card");
                                 card.classList.remove("status-pending");
                                 card.classList.add("status-done");
 
-                                // Disable the button immediately
                                 button.disabled = true;
 
                                 const streakBox = card.querySelector(".routine-streak");
                                 streakBox.textContent = "Streak: " + data.new_streak + " Days";
 
-                                // Show SweetAlert Success Toast
                                 Toast.fire({
                                     icon: 'success',
                                     title: data.message
                                 });
                             } else if (data.status === "info") {
-                                // Show SweetAlert Info Toast
                                 Toast.fire({
                                     icon: 'info',
                                     title: data.message

@@ -1,9 +1,11 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Task, TaskDailyLog
 from django.utils import timezone
 from datetime import date, timedelta
 import calendar
+from django.views.decorators.http import require_POST
 
 
 def home(request):
@@ -144,3 +146,27 @@ def task_detail(request, task_id):
         'today': today,
     }
     return render(request, 'blog/task_detail.html', context)
+
+
+@login_required
+@require_POST
+def add_task(request):
+    task_name = request.POST.get('task_name', '').strip()
+    if task_name:
+        Task.objects.create(
+            name=task_name,
+            streak=0,
+            longest_streak=0,
+            status='pending',
+            freezes_left=3,
+            last_freeze_reset=timezone.localdate().strftime('%Y-%m'),
+        )
+    return redirect('routines')
+
+
+@login_required
+@require_POST
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.delete()
+    return redirect('routines')
