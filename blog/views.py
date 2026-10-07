@@ -1,11 +1,12 @@
-from django.shortcuts import render, get_object_or_404, redirect
+import calendar
+from datetime import date, timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Task, TaskDailyLog
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from datetime import date, timedelta
-import calendar
 from django.views.decorators.http import require_POST
+from .models import Task, TaskDailyLog
 
 
 def home(request):
@@ -13,9 +14,8 @@ def home(request):
 
 
 def process_task_logic(task):
-    now = timezone.now()
-    today = now.date()
-    current_month = now.strftime("%Y-%m")
+    today = timezone.localdate()
+    current_month = today.strftime("%Y-%m")
 
     # 1. Reset freezes monthly
     if task.last_freeze_reset != current_month:
@@ -25,7 +25,7 @@ def process_task_logic(task):
 
     # 2. Check missed days and update streak/freezes
     if task.last_updated:
-        last_date = task.last_updated.date()
+        last_date = timezone.localtime(task.last_updated).date()
         days_passed = (today - last_date).days
 
         if days_passed == 1:
@@ -36,7 +36,7 @@ def process_task_logic(task):
             days_missed = days_passed - 1
             if task.freezes_left >= days_missed:
                 task.freezes_left -= days_missed
-                task.last_updated = now - timedelta(days=1)
+                task.last_updated = timezone.now() - timedelta(days=1)
                 task.status = 'pending'
                 task.save()
             else:
@@ -63,12 +63,12 @@ def update_task(request, task_id):
         # 1. First, check time logic
         process_task_logic(task)
 
-        # 2. Define current time for this function
+        # 2. Define current time for this function using localdate
         now = timezone.now()
-        today = now.date()
+        today = timezone.localdate()
 
         # 3. Prevent clicking again on the same day
-        if task.last_updated and task.last_updated.date() == today:
+        if task.last_updated and timezone.localtime(task.last_updated).date() == today:
             return JsonResponse({'status': 'info', 'message': 'Already completed today'})
 
         # 4. Perform the update
@@ -159,7 +159,7 @@ def add_task(request):
             longest_streak=0,
             status='pending',
             freezes_left=3,
-            last_freeze_reset=timezone.localdate().strftime('%Y-%m'),
+            last_freeze_reset=timezone.localdate().strftime("%Y-%m"),
         )
     return redirect('routines')
 
