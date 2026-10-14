@@ -3,7 +3,12 @@ from django.utils import timezone
 
 
 class Task(models.Model):
-    STATUS_CHOICE = [('pending', 'Pending'), ('done', 'Done'), ('frozen', 'Frozen'), ('broken', 'Streak Broken')]
+    STATUS_CHOICE = [
+        ('pending', 'Pending'),
+        ('done', 'Done'),
+        ('frozen', 'Frozen'),
+        ('broken', 'Streak Broken'),
+    ]
 
     name = models.CharField(max_length=100, unique=True)
     streak = models.IntegerField(default=0)
@@ -29,7 +34,8 @@ class TaskDailyLog(models.Model):
         ('missed', 'Missed'),
     ]
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='daily_logs')
-    date = models.DateField(default=timezone.now)
+    # اصلاح اصلی: استفاده از timezone.localdate بدون پرانتز برای محاسبه پویا در زمان ایجاد
+    date = models.DateField(default=timezone.localdate)
     status = models.CharField(max_length=10, choices=LOG_STATUS_CHOICES)
 
     class Meta:
