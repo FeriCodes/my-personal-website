@@ -18,33 +18,41 @@ def process_task_logic(task):
     today = timezone.localdate()
     current_month = today.strftime("%Y-%m")
 
-    # 1. Reset freezes monthly
+    # ریست ماهانه فریزها
     if task.last_freeze_reset != current_month:
         task.freezes_left = 3
         task.last_freeze_reset = current_month
         task.save()
 
-    # 2. Check missed days and update streak/freezes
-    if task.last_updated:
-        last_date = timezone.localtime(task.last_updated).date()
-        days_passed = (today - last_date).days
+    if not task.last_updated:
+        return
 
-        if days_passed == 1:
-            if task.status != 'pending':
-                task.status = 'pending'
-                task.save()
-        elif days_passed > 1:
-            days_missed = days_passed - 1
-            if task.freezes_left >= days_missed:
-                task.freezes_left -= days_missed
-                task.last_updated = timezone.now() - timedelta(days=1)
-                task.status = 'pending'
-                task.save()
-            else:
-                task.streak = 0
-                task.freezes_left = 0
-                task.status = 'pending'
-                task.save()
+    last_date = timezone.localtime(task.last_updated).date()
+    days_passed = (today - last_date).days
+
+    if days_passed <= 0:
+        return
+
+    if days_passed == 1:
+        if task.status != 'pending':
+            task.status = 'pending'
+            task.save()
+        return
+
+    for i in range(1, days_passed):
+        missed_date = last_date + timedelta(days=i)
+        if task.freezes_left > 0 and task.streak > 0:
+            task.freezes_left -= 1
+            log_status = 'frozen'
+        else:
+            task.streak = 0
+            log_status = 'missed'
+        TaskDailyLog.objects.update_or_create(task=task, date=missed_date, defaults={'status': log_status})
+
+    # دوباره پردازش نشود: آخرین روز را «دیروز» می‌گذاریم
+    task.last_updated = timezone.now() - timedelta(days=1)
+    task.status = 'pending'
+    task.save()
 
 
 def routines_view(request):
@@ -91,7 +99,7 @@ def update_task(request, task_id):
 
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-
+    process_task_logic(task)
     today = timezone.localdate()
     year = int(request.GET.get('year', today.year))
     month = int(request.GET.get('month', today.month))
