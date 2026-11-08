@@ -1,4 +1,5 @@
 import calendar
+import json
 from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
@@ -18,7 +19,7 @@ def process_task_logic(task):
     today = timezone.localdate()
     current_month = today.strftime("%Y-%m")
 
-    # ریست ماهانه فریزها
+    # 1. Reset freezes monthly
     if task.last_freeze_reset != current_month:
         task.freezes_left = 3
         task.last_freeze_reset = current_month
@@ -39,6 +40,7 @@ def process_task_logic(task):
             task.save()
         return
 
+    # 2. Process missed days and apply freezes if available
     for i in range(1, days_passed):
         missed_date = last_date + timedelta(days=i)
         if task.freezes_left > 0 and task.streak > 0:
@@ -49,7 +51,7 @@ def process_task_logic(task):
             log_status = 'missed'
         TaskDailyLog.objects.update_or_create(task=task, date=missed_date, defaults={'status': log_status})
 
-    # دوباره پردازش نشود: آخرین روز را «دیروز» می‌گذاریم
+    # Set last_updated to yesterday to prevent reprocessing missed days
     task.last_updated = timezone.now() - timedelta(days=1)
     task.status = 'pending'
     task.save()
@@ -77,7 +79,7 @@ def update_task(request, task_id):
         today = timezone.localdate()
 
         # 3. Prevent clicking again on the same day
-        if task.last_updated and timezone.localtime(task.last_updated).date() == today:
+        if task.last_updated and timezone.localtime(task.last_updated).date() == today and task.status == 'done':
             return JsonResponse({'status': 'info', 'message': 'Already completed today'})
 
         # 4. Perform the update
@@ -127,16 +129,18 @@ def task_detail(request, task_id):
         week_data = []
         for day in week:
             if day == 0:
-                week_data.append({'day': '', 'status': 'empty', 'is_today': False})
+                week_data.append({'day': '', 'status': 'empty', 'is_today': False, 'is_future': False})
             else:
                 current_day_date = date(year, month, day)
                 is_today = current_day_date == today
+                is_future = current_day_date > today
                 day_status = log_map.get(day, 'none')
                 week_data.append(
                     {
                         'day': day,
                         'status': day_status,
                         'is_today': is_today,
+                        'is_future': is_future,
                         'date_str': current_day_date.strftime("%Y-%m-%d"),
                     }
                 )
@@ -155,6 +159,59 @@ def task_detail(request, task_id):
         'today': today,
     }
     return render(request, 'blog/task_detail.html', context)
+
+
+@login_required
+@require_POST
+def toggle_day_log(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    try:
+        data = json.loads(request.body)
+        date_str = data.get('date')
+        target_date = date.fromisoformat(date_str)
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse({'status': 'error', 'message': 'Invalid date format'}, status=400)
+
+    today = timezone.localdate()
+    if target_date > today:
+        return JsonResponse({'status': 'error', 'message': 'Cannot mark future dates!'}, status=400)
+
+    existing_log = TaskDailyLog.objects.filter(task=task, date=target_date).first()
+    old_status = existing_log.status if existing_log else 'none'
+
+    if old_status == 'done':
+        return JsonResponse({'status': 'info', 'message': 'This day is already marked as Done!'})
+
+    # 1. Refund freeze if the day was previously frozen
+    if old_status == 'frozen':
+        task.freezes_left += 1
+
+    # 2. Update or create daily log as 'done'
+    TaskDailyLog.objects.update_or_create(task=task, date=target_date, defaults={'status': 'done'})
+
+    # 3. Increment streak and update longest streak if needed
+    task.streak += 1
+    if task.streak > task.longest_streak:
+        task.longest_streak = task.streak
+
+    # 4. Update task status if the selected date is today
+    if target_date == today:
+        task.status = 'done'
+        task.last_updated = timezone.now()
+
+    task.save()
+
+    return JsonResponse(
+        {
+            'status': 'success',
+            'new_status': 'done',
+            'new_streak': task.streak,
+            'longest_streak': task.longest_streak,
+            'freezes_left': task.freezes_left,
+            'is_today': target_date == today,
+            'message': f'Marked {date_str} as Done!',
+        }
+    )
 
 
 @login_required

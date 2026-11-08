@@ -53,14 +53,15 @@
                         <!-- Check Routine Button -->
                         <button class="btn-check-routine"
                                 data-task-id="{{ task.id }}"
+                                data-task-name="{{ task.name }}"
                                 {% if task.status == 'done' %}disabled{% endif %}>✓</button>
 
                         <!-- Admin Delete Routine Button (Protected) -->
                         {% if user.is_authenticated %}
                             <form action="{% url 'delete_task' task.id %}"
                                   method="post"
-                                  onsubmit="return confirm('Are you sure you want to delete this routine?');"
-                                  class="m-0">
+                                  class="m-0 delete-routine-form"
+                                  data-task-name="{{ task.name }}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-outline-danger btn-delete-routine">✕</button>
                             </form>
@@ -80,6 +81,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const checkButtons = document.querySelectorAll(".btn-check-routine");
+            const deleteForms = document.querySelectorAll(".delete-routine-form");
             const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
 
             if (!csrfInput) {
@@ -88,52 +90,96 @@
             }
             const csrfToken = csrfInput.value;
 
-            // SweetAlert2 configuration for minimalist toasts
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'bottom-end',
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-                background: '#2d2942',
-                color: '#fff',
+                customClass: {
+                    popup: 'swal-custom-toast'
+                }
             });
 
             checkButtons.forEach(button => {
                 button.addEventListener("click", function() {
                     const taskId = this.getAttribute("data-task-id");
+                    const taskName = this.getAttribute("data-task-name");
 
-                    fetch(`/routines/update/${taskId}/`, {
-                            method: "POST",
-                            headers: {
-                                "X-CSRFToken": csrfToken,
-                                "Content-Type": "application/json"
-                            },
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === "success") {
-                                const card = button.closest(".routine-card");
-                                card.classList.remove("status-pending");
-                                card.classList.add("status-done");
+                    Swal.fire({
+                        title: 'Complete Routine?',
+                        text: `Mark "${taskName}" as done for today?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, done!',
+                        cancelButtonText: 'No, not yet',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'swal-custom-popup',
+                            confirmButton: 'swal-btn-confirm-success',
+                            cancelButton: 'swal-btn-cancel'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/routines/update/${taskId}/`, {
+                                    method: "POST",
+                                    headers: {
+                                        "X-CSRFToken": csrfToken,
+                                        "Content-Type": "application/json"
+                                    },
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.status === "success") {
+                                        const card = button.closest(".routine-card");
+                                        card.classList.remove("status-pending");
+                                        card.classList.add("status-done");
 
-                                button.disabled = true;
+                                        button.disabled = true;
 
-                                const streakBox = card.querySelector(".routine-streak");
-                                streakBox.textContent = "Streak: " + data.new_streak + " Days";
+                                        const streakBox = card.querySelector(".routine-streak");
+                                        streakBox.textContent = "Streak: " + data.new_streak + " Days";
 
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: data.message
-                                });
-                            } else if (data.status === "info") {
-                                Toast.fire({
-                                    icon: 'info',
-                                    title: data.message
-                                });
-                            }
-                        })
-                        .catch(error => console.error("Error:", error));
+                                        Toast.fire({
+                                            icon: 'success',
+                                            title: data.message
+                                        });
+                                    } else if (data.status === "info") {
+                                        Toast.fire({
+                                            icon: 'info',
+                                            title: data.message
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        }
+                    });
+                });
+            });
+
+            deleteForms.forEach(form => {
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    const taskName = this.getAttribute("data-task-name");
+
+                    Swal.fire({
+                        title: 'Delete Routine?',
+                        text: `Are you sure you want to permanently delete "${taskName}"?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!',
+                        cancelButtonText: 'Cancel',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'swal-custom-popup',
+                            confirmButton: 'swal-btn-confirm-danger',
+                            cancelButton: 'swal-btn-cancel'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
         });

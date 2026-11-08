@@ -519,3 +519,58 @@ body {
     background-color: transparent;
     border: 2px solid #e5c07b;
 }
+
+/* =========================================
+   INTERACTIVE CALENDAR & SWEETALERT2 STYLES
+   ========================================= */
+
+.clickable-day {
+    cursor: pointer;
+}
+
+.swal-custom-popup {
+    background-color: #1e1b26 !important;
+    color: #e2e2e2 !important;
+    border: 1px solid #2d2942 !important;
+    border-radius: 12px !important;
+}
+
+.swal-custom-toast {
+    background-color: #2d2942 !important;
+    color: #e2e2e2 !important;
+    border: 1px solid #3e4451 !important;
+}
+
+.swal-btn-confirm-success {
+    background-color: #98c379 !important;
+    color: #12101c !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    margin: 0 6px !important;
+}
+
+.swal-btn-confirm-danger {
+    background-color: #e06c75 !important;
+    color: #12101c !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    margin: 0 6px !important;
+}
+
+.swal-btn-cancel {
+    background-color: #21252b !important;
+    color: #a8a3c4 !important;
+    border: 1px solid #3e4451 !important;
+    border-radius: 6px !important;
+    padding: 8px 20px !important;
+    margin: 0 6px !important;
+}
+
+.swal-btn-cancel:hover {
+    background-color: #2d2942 !important;
+    color: #ffffff !important;
+}

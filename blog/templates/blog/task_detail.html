@@ -6,6 +6,8 @@
 {% block content %}
     <div class="container mt-4 routines-container">
 
+        {% csrf_token %}
+
         <!-- Top Bar: Back Link & Title -->
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 detail-header-divider">
             <div>
@@ -14,7 +16,8 @@
             </div>
             <div class="text-end">
                 <span class="badge bg-dark p-2 detail-badge-streak">
-                    Current Streak: <strong class="detail-streak-highlight">{{ task.streak }} Days</strong>
+                    Current Streak: <strong class="detail-streak-highlight"
+         id="current-streak-val">{{ task.streak }} Days</strong>
                 </span>
             </div>
         </div>
@@ -24,17 +27,16 @@
             <div class="row text-center">
                 <div class="col-4">
                     <div class="detail-stat-label">LONGEST STREAK</div>
-                    <div class="h4 m-0 stat-longest-streak">{{ task.longest_streak }} Days</div>
+                    <div class="h4 m-0 stat-longest-streak" id="longest-streak-val">{{ task.longest_streak }} Days</div>
                 </div>
                 <div class="col-4">
                     <div class="detail-stat-label">FREEZES LEFT</div>
-                    <div class="h4 m-0 stat-freezes">{{ task.freezes_left }}</div>
+                    <div class="h4 m-0 stat-freezes" id="freezes-left-val">{{ task.freezes_left }}</div>
                 </div>
                 <div class="col-4">
                     <div class="detail-stat-label">STATUS TODAY</div>
-                    <div class="h4 m-0 {% if task.status == 'done' %}stat-status-done{% else %}stat-status-pending{% endif %}">
-                        {{ task.status|title }}
-                    </div>
+                    <div class="h4 m-0 {% if task.status == 'done' %}stat-status-done{% else %}stat-status-pending{% endif %}"
+                         id="status-today-val">{{ task.status|title }}</div>
                 </div>
             </div>
         </div>
@@ -44,6 +46,9 @@
             <!-- Centered Month & Year -->
             <div class="text-center mb-4">
                 <h3 class="m-0 calendar-section-title fw-bold">{{ month_name }} {{ year }}</h3>
+                {% if user.is_authenticated %}
+                    <small class="calendar-section-desc d-block mt-1">Click on any past or current day to mark it as Done.</small>
+                {% endif %}
             </div>
 
             <!-- Calendar Grid Table -->
@@ -66,7 +71,9 @@
                                 {% for day in week %}
                                     <td>
                                         {% if day.status != "empty" %}
-                                            <div class="calendar-day-box status-{{ day.status }} {% if day.is_today %}today-border{% endif %}"
+                                            <div class="calendar-day-box status-{{ day.status }} {% if day.is_today %}today-border{% endif %} {% if user.is_authenticated and not day.is_future and day.status != 'done' %}clickable-day{% endif %}"
+                                                 data-date="{{ day.date_str }}"
+                                                 data-status="{{ day.status }}"
                                                  title="{{ day.date_str }}: {{ day.status|title }}">
                                                 <span class="day-number">{{ day.day }}</span>
                                             </div>
@@ -102,4 +109,97 @@
         </div>
 
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {% if user.is_authenticated %}
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const clickableDays = document.querySelectorAll(".clickable-day");
+                const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+                const csrfToken = csrfInput ? csrfInput.value : "";
+
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'bottom-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'swal-custom-toast'
+                    }
+                });
+
+                clickableDays.forEach(box => {
+                    box.addEventListener("click", function() {
+                        const targetDate = this.getAttribute("data-date");
+                        const currentStatus = this.getAttribute("data-status");
+
+                        if (currentStatus === "done") return;
+
+                        Swal.fire({
+                            title: 'Mark as Done?',
+                            text: `Are you sure you want to mark ${targetDate} as completed?`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, mark it!',
+                            cancelButtonText: 'No, cancel',
+                            buttonsStyling: false,
+                            customClass: {
+                                popup: 'swal-custom-popup',
+                                confirmButton: 'swal-btn-confirm-success',
+                                cancelButton: 'swal-btn-cancel'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch("{% url 'toggle_day_log' task.id %}", {
+                                        method: "POST",
+                                        headers: {
+                                            "X-CSRFToken": csrfToken,
+                                            "Content-Type": "application/json"
+                                        },
+                                        body: JSON.stringify({
+                                            date: targetDate
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === "success") {
+                                            // Update calendar box UI immediately via CSS classes
+                                            box.classList.remove("status-none", "status-frozen", "status-missed", "clickable-day");
+                                            box.classList.add("status-done");
+                                            box.setAttribute("data-status", "done");
+                                            box.title = `${targetDate}: Done`;
+
+                                            // Update top stats dynamically without page reload
+                                            document.getElementById("current-streak-val").textContent = data.new_streak + " Days";
+                                            document.getElementById("longest-streak-val").textContent = data.longest_streak + " Days";
+                                            document.getElementById("freezes-left-val").textContent = data.freezes_left;
+
+                                            if (data.is_today) {
+                                                const statusTodayEl = document.getElementById("status-today-val");
+                                                statusTodayEl.textContent = "Done";
+                                                statusTodayEl.classList.remove("stat-status-pending");
+                                                statusTodayEl.classList.add("stat-status-done");
+                                            }
+
+                                            Toast.fire({
+                                                icon: 'success',
+                                                title: data.message
+                                            });
+                                        } else {
+                                            Toast.fire({
+                                                icon: 'error',
+                                                title: data.message || 'Something went wrong'
+                                            });
+                                        }
+                                    })
+                                    .catch(error => console.error("Error:", error));
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+    {% endif %}
 {% endblock %}
